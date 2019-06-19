@@ -975,7 +975,8 @@ static struct break_hook refcount_break_hook = {
 /* This registration must happen early, before debug_traps_init(). */
 void __init trap_init(void)
 {
-	register_kernel_break_hook(&bug_break_hook);
+ 	register_kernel_break_hook(&bug_break_hook);
+	register_kernel_break_hook(&refcount_break_hook);
 #ifdef CONFIG_KASAN_SW_TAGS
 	register_kernel_break_hook(&kasan_break_hook);
 #endif
