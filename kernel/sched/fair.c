@@ -907,7 +907,7 @@ void post_init_entity_util_avg(struct sched_entity *se)
 			/*
 			 * For !fair tasks do:
 			 *
-			update_cfs_rq_load_avg(now, cfs_rq);
+			update_cfs_rq_load_avg(now, cfs_rq, false);
 			attach_entity_load_avg(cfs_rq, se);
 			switched_from_fair(rq, p);
 			 *
@@ -3545,7 +3545,7 @@ static inline void set_tg_cfs_propagate(struct cfs_rq *cfs_rq) {}
  * call update_tg_load_avg() when this function returns true.
  */
 static inline int
-update_cfs_rq_load_avg(u64 now, struct cfs_rq *cfs_rq)
+update_cfs_rq_load_avg(u64 now, struct cfs_rq *cfs_rq, bool update_freq)
 {
 	struct sched_avg *sa = &cfs_rq->avg;
 	int decayed, removed_load = 0, removed_util = 0;
@@ -3573,7 +3573,7 @@ update_cfs_rq_load_avg(u64 now, struct cfs_rq *cfs_rq)
 	cfs_rq->load_last_update_time_copy = sa->last_update_time;
 #endif
 
-	if (decayed || removed_util)
+	if (update_freq && (decayed || removed_util))
 		cfs_rq_util_change(cfs_rq);
 
 	return decayed || removed_load;
@@ -3611,7 +3611,7 @@ static inline void update_load_avg(struct sched_entity *se, int flags)
 	if (se->avg.last_update_time && !(flags & SKIP_AGE_LOAD))
 		__update_load_avg_se(now, cpu, cfs_rq, se);
 
-	decayed  = update_cfs_rq_load_avg(now, cfs_rq);
+	decayed  = update_cfs_rq_load_avg(now, cfs_rq, !(flags & SKIP_CPUFREQ));
 	decayed |= propagate_entity_load_avg(se);
 
 	if (decayed && (flags & UPDATE_TG))
@@ -9573,7 +9573,7 @@ static void update_blocked_averages(int cpu)
 		if (throttled_hierarchy(cfs_rq))
 			continue;
 
-		if (update_cfs_rq_load_avg(cfs_rq_clock_task(cfs_rq), cfs_rq))
+		if (update_cfs_rq_load_avg(cfs_rq_clock_task(cfs_rq), cfs_rq, true))
 			update_tg_load_avg(cfs_rq, 0);
 
 		/* Propagate pending load changes to the parent, if any: */
