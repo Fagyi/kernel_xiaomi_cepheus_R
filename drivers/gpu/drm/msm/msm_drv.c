@@ -498,6 +498,16 @@ static int msm_power_enable_wrapper(void *handle, void *client, bool enable)
 	return sde_power_resource_enable(handle, client, enable);
 }
 
+static void msm_drm_pm_unreq(struct work_struct *work)
+{
+	struct msm_drm_private *priv = container_of(to_delayed_work(work),
+						    typeof(*priv),
+						    pm_unreq_dwork);
+
+pm_qos_update_request(&priv->pm_irq_req, PM_QOS_DEFAULT_VALUE);
+	atomic_set_release(&priv->pm_req_set, 0);
+}
+
 static ssize_t idle_encoder_mask_store(struct device *device,
 			       struct device_attribute *attr,
 			       const char *buf, size_t count)
