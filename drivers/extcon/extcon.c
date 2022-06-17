@@ -1098,7 +1098,7 @@ static void dummy_sysfs_dev_release(struct device *dev)
  * @supported_cable:	the array of the supported external connectors
  *			ending with EXTCON_NONE.
  *
- * Note that this function allocates the memory for extcon device 
+ * Note that this function allocates the memory for extcon device
  * and initialize default setting for the extcon device.
  *
  * Returns the pointer memory of allocated extcon_dev if success
@@ -1318,13 +1318,6 @@ int extcon_dev_register(struct extcon_dev *edev)
 		goto err_dev;
 	}
 
-	edev->bnh = devm_kcalloc(&edev->dev,
-			edev->max_supported, sizeof(*edev->bnh), GFP_KERNEL);
-	if (!edev->bnh) {
-		ret = -ENOMEM;
-		goto err_dev;
-	}
-
 	for (index = 0; index < edev->max_supported; index++)
 		RAW_INIT_NOTIFIER_HEAD(&edev->nh[index]);
 
@@ -1332,6 +1325,13 @@ int extcon_dev_register(struct extcon_dev *edev)
 
 	dev_set_drvdata(&edev->dev, edev);
 	edev->state = 0;
+
+	edev->bnh = devm_kcalloc(&edev->dev,
+			edev->max_supported, sizeof(*edev->bnh), GFP_KERNEL);
+	if (!edev->bnh) {
+		ret = -ENOMEM;
+		goto err_dev;
+	}
 
 	mutex_lock(&extcon_dev_list_lock);
 	list_add(&edev->entry, &extcon_dev_list);
