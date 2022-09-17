@@ -242,10 +242,6 @@ static void sugov_update_commit(struct sugov_policy *sg_policy, u64 time,
 		for_each_cpu(cpu, policy->cpus) {
 			trace_cpu_frequency(next_freq, cpu);
 		}
-	} else {
-		if (use_pelt())
-			sg_policy->work_in_progress = true;
-		sched_irq_work_queue(&sg_policy->irq_work);
 	}
 }
 
