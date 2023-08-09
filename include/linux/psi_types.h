@@ -120,7 +120,6 @@ struct psi_trigger {
 	 * events to one per window
 	 */
 	u64 last_event_time;
-
 };
 
 struct psi_group {
